@@ -7,17 +7,27 @@ def test(config):
     master_pd = make_master(config)
     preprocessing(config, master_pd)
 
-def preprocessing(config, dataframe):
+def preprocessing(config, df):
     """
     설명 (서울특별시 아닌거, 위도경도 00인거(폐쇄), 등등)
     Args:
         config:
-        dataframe:
+        df:
+    Results:
+        station, not_in_Seoul, closed_station
     """
-    print(dataframe[dataframe.iloc[:,1].apply(lambda x : x.split(' ')[0])=='서울특별시'])
-    
+    # only include station in Seoul
+    not_in_Seoul = df[df.iloc[:,1].apply(lambda x: x.split(' ')[0] == '경기')]
+    not_in_Seoul = list(not_in_Seoul.iloc[:,0])
+    # only include open station
+    closed_station = df[(df.iloc[:,-1]==0) | (df.iloc[:,1] =='')]
+    closed_station = list(closed_station.iloc[:,0])
+    # classify 'Si' to 'Gu'
+    df = df[(df.iloc[:,1].apply(lambda x: x.split(' ')[0] != '경기')) & (df.iloc[:,-1]!=0) & (df.iloc[:,1] ==' ')]
+    # df['Gu'] = df.iloc[:,1].apply(lambda x:x.split(' ')[1])
+    # print(df['Gu'])
 
-    print(dataframe)
+
 
 def make_master(config):
     """
