@@ -61,7 +61,7 @@ def make_plot(config, array, temperature, save_path):
     ax.set_xticks(range(0, len(array.flatten())+1, 12),
                   [f'{int(str(start_year)[2:])+x//12}/{(x%12)+1}' for x in range(0, len(array.flatten())+1, 12)])
     ax.set_xlim([-1, len(array.flatten())+1])
-    ax.legend()
+    ax.legend(loc='upper left')
     plt.savefig(f'{save_path}long_plot.png')
 
     fig, ax = plt.subplots(figsize = (16, 8))
@@ -72,7 +72,7 @@ def make_plot(config, array, temperature, save_path):
     label_tem, color_tem = ['mean', 'lowest', 'highest'], ['green', 'blue', 'red']
     for idx, tem_array in enumerate(temperature):
         ax2.plot(range(12), tem_array, label = label_tem[idx], color = color_tem[idx])
-    ax2.legend()
+    ax2.legend(loc='upper right')
     ax2.set_ylabel('Degree Celsius')
     for years in range(len(array)):
         if years == 0 :
@@ -86,7 +86,7 @@ def make_plot(config, array, temperature, save_path):
         else:
             ax.plot(range(12) ,array[years], 'o-.', label = f'{start_year+years}', color = config['colors'][years])
     ax.set_xticks(range(12), [date(2000,month,1).strftime("%b") for month in range(1, 13)])
-    ax.legend()
+    ax.legend(loc='upper left')
     plt.savefig(f'{save_path}short_plot.png')
 
 def temperature():
