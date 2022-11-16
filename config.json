@@ -1,7 +1,7 @@
 {
     "keys": "",
     "path": {
-        "data": "./data",
+        "data": "./data/",
         "usage": "./data/usage/",
         "plot": "./data/plot/"
     },
@@ -9,5 +9,10 @@
         "year": 2015,
         "month": 9
     },
-    "colors":["#CEFBD8","#A0F8BC", "#6DEAA1", "#47D591", "#15ba7b", "#0F9F77", "#0A856F", "#066B63", "#045759"]
+    "age": {
+        "minutes" : [1, 121],
+        "age" : [15, 81]
+    },
+    "colors": ["#CEFBD8","#A0F8BC", "#6DEAA1", "#47D591", "#15ba7b", "#0F9F77", "#0A856F", "#066B63", "#045759"],
+    "station": ["ST-2031", "ST-2905", "ST-318", "ST-1137"]
 }

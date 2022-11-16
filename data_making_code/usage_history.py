@@ -6,6 +6,8 @@ import pandas as pd
 from tqdm import tqdm
 import os
 
+
+
 def usage_history(config):
     """
     지금 현재 없는 데이터를 찾고, 해당 데이터를 api를 통해 받아 온다.

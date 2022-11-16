@@ -62,6 +62,7 @@ def make_plot(config, array, temperature, save_path):
                   [f'{int(str(start_year)[2:])+x//12}/{(x%12)+1}' for x in range(0, len(array.flatten())+1, 12)])
     ax.set_xlim([-1, len(array.flatten())+1])
     ax.legend(loc='upper left')
+    plt.grid(True)
     plt.savefig(f'{save_path}long_plot.png')
 
     fig, ax = plt.subplots(figsize = (16, 8))
@@ -87,6 +88,7 @@ def make_plot(config, array, temperature, save_path):
             ax.plot(range(12) ,array[years], 'o-.', label = f'{start_year+years}', color = config['colors'][years])
     ax.set_xticks(range(12), [date(2000,month,1).strftime("%b") for month in range(1, 13)])
     ax.legend(loc='upper left')
+    plt.grid(True)
     plt.savefig(f'{save_path}short_plot.png')
 
 def temperature():

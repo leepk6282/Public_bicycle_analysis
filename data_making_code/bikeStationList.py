@@ -48,11 +48,8 @@ def make_df(config):
     keys = config['keys']
     data_path = config['path']['data']
     os.makedirs(data_path, exist_ok=True)
-
     if 'bikeStationList.csv' in os.listdir(data_path):
-        start_time = time.time()
-        master_pd = pd.read_csv(data_path + 'bikeStationList.csv', encoding='cp949', index_col=[0])
-
+        master_pd = pd.read_csv(f'{data_path}bikeStationList.csv', index_col=[0])
     else:
         start_time = time.time()
         thousand = 0
@@ -75,10 +72,10 @@ def make_df(config):
                         break
             thousand+=1
         master_pd = master_pd.set_index(master_pd.columns[0])
-        master_pd.to_csv(data_path + 'bikeStationList.csv', encoding='cp949', index=True)
+        master_pd.to_csv(f'{data_path}bikeStationList.csv', index=True)
         print(f'대여소 목록 생성 {time.time()-start_time:<.2f}초 소요')
-
     return master_pd
+
 if __name__ == "__main__":
     with open('config.json') as f:
         config = json.load(f)
