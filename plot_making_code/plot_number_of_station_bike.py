@@ -17,11 +17,11 @@ def plot_number_of_station_bike(config):
         config: configuration
     """
     data_path = config['path']['data']
-    if 'parking.csv' in os.listdir(data_path):
-        parking = pd.read_csv(f'{data_path}parking.csv')
-    else:
-        parking = preprocessing(config)
-    make_parking_plot(config, parking)
+    # if 'parking.csv' in os.listdir(data_path):
+    #     parking = pd.read_csv(f'{data_path}parking.csv')
+    # else:
+    #     parking = preprocessing(config)
+    # make_parking_plot(config, parking)
     if 'scatter.csv' in os.listdir(data_path):
         scatter = pd.read_csv(f'{data_path}scatter.csv')
     else:
@@ -30,7 +30,6 @@ def plot_number_of_station_bike(config):
 
 def preprocessing_specific(config):
     usage_path = config['path']['usage']
-    data_path = config['path']['data']
     station_list = config['station']
     result_df = pd.DataFrame()
     for file_name in tqdm(os.listdir(usage_path)):
@@ -39,44 +38,57 @@ def preprocessing_specific(config):
         result_df = pd.concat([result_df, _])
     result_df = result_df.loc[~result_df.loc[:,'RTN_DT'].isna()]
     result_df.reset_index(drop=True, inplace=True)
+    data_path = config['path']['data']
     result_df.to_csv(f'{data_path}scatter.csv')
     return result_df
 
-def make_scatter_plot(config, array:pd.DataFrame):
-    colors = config['colors']
+def make_scatter_plot(config, array_:pd.DataFrame):
+    colors = config['colors_vs']
     save_path = config['path']['plot']
     station_list = config['station']
     for station in station_list:
         for mode in [['RENT', 'RENT'], ['RETURN', 'RTN']]:
-            _ = array.loc[array.loc[:,f'{mode[0]}_STATION_ID'] == station]
+            _ = array_.loc[array_.loc[:,f'{mode[0]}_STATION_ID'] == station]
             _.loc[:,'RENT_DT'] = _.loc[:,'RENT_DT'].apply(lambda x: datetime.datetime.strptime(str(x), '%Y-%m-%d %H:%M:%S'))
             _.loc[:,'RTN_DT'] = _.loc[:,'RTN_DT'].apply(lambda x: datetime.datetime.strptime(str(x), '%Y-%m-%d %H:%M:%S'))
             _.insert(len(_.columns), 'x', _.loc[:,f'{mode[1]}_DT'].apply(lambda x: x.hour+x.minute/60+x.second/3600), True)
             _.insert(len(_.columns), 'y', (_.loc[:,"RTN_DT"]-_.loc[:,"RENT_DT"]).apply(lambda x: x.total_seconds()/60))
-            fig, ax = plt.subplots(figsize=(12,6))
-            ax.set_title('Scatter plot of specific station')
+            fig = plt.figure(figsize=(12,6))
+            gs = fig.add_gridspec(2, 2,  width_ratios=(8, 1), height_ratios=(1, 4),
+                      left=0.1, right=0.9, bottom=0.1, top=0.9,
+                      wspace=0.05, hspace=0.05)
+            ax = fig.add_subplot(gs[1, 0])
+            ax_histx = fig.add_subplot(gs[0, 0], sharex=ax)
+            ax_histy = fig.add_subplot(gs[1, 1], sharey=ax)
+            ax_histx.tick_params(axis="x", labelbottom=False)
+            ax_histy.tick_params(axis="y", labelleft=False)
+            # ax.set_title(f'{station} {mode[0]}')
+            plt.suptitle(f'{station} {mode[0]}')
             ax.set_xlabel('Hours')
             ax.set_ylabel('Usage hours')
-            for idx, sex in enumerate(['M', 'Unknown', 'F']):
+            for idx, sex in enumerate(['Unknown', 'M', 'F']):
                 if sex in ['M', 'F']:
-                    _ = _.loc[_.loc[:,'SEX_CD'] == sex]
-                    ax.scatter(x=_.loc[:,'x'], y=_.loc[:,'y'], c=[colors[idx*3+2]]*len(_),
-                            sizes=np.array([1]*len(_)), alpha=0.2, label=f'{sex}')
+                    __ = _.loc[_.loc[:,'SEX_CD'] == sex]
+                    x = np.array(__.loc[:,'x'], dtype='float64')
+                    y = np.array(__.loc[:,'y'], dtype='float64')
+                    ax.scatter(x=x, y=y, c=[colors[idx]]*len(__), sizes=np.array([1]*len(__)), alpha=0.03, label=f'{sex}')
+                    ax_histx.hist(x, bins=np.arange(0,24,0.1), histtype='step', color=colors[idx])
+                    ax_histy.hist(y, bins=np.arange(0,120,0.5), histtype='step', color=colors[idx], orientation='horizontal')
                 else:
-                    _ = _.loc[~_.loc[:,'SEX_CD'].isna()]
-                    ax.scatter(x=_.loc[:,'x'], y=_.loc[:,'y'], c=[colors[idx*3+2]]*len(_),
-                            sizes=np.array([1]*len(_)), alpha=0.2, label=f'{sex}')
+                    __ = _.loc[~_.loc[:,'SEX_CD'].isna()]
+                    ax.scatter(x=np.array(__.loc[:,'x'], dtype='float64'), y=np.array(__.loc[:,'y'], dtype='float64'),
+                                          c=[colors[idx]]*len(__), sizes=np.array([1]*len(__)), alpha=0.03, label=f'{sex}')
             ax.set_ylim(bottom=-1, top=121)
             ax.set_yticks(range(0,121,10))
             ax.set_yticklabels(range(0,121,10))
             ax.set_xlim(left=-0.1, right=24.1)
             ax.set_xticks(range(0,25))
-            custom_legends = [Line2D([0], [0], marker='o', color=colors[2], label='M', markersize=6, alpha=0.7, linestyle=''),
-                              Line2D([0], [0], marker='o', color=colors[5], label='Unknown', markersize=6, alpha=0.7, linestyle=''),
-                              Line2D([0], [0], marker='o', color=colors[8], label='F', markersize=6, alpha=0.7, linestyle='')]
+            custom_legends = [Line2D([0], [0], marker='o', color=colors[0], label='Unknown', markersize=6, alpha=1, linestyle=''),
+                              Line2D([0], [0], marker='o', color=colors[1], label='M', markersize=6, alpha=1, linestyle=''),
+                              Line2D([0], [0], marker='o', color=colors[2], label='F', markersize=6, alpha=1, linestyle='')]
             ax.legend(handles=custom_legends, loc='upper left')
             ax.grid(True, alpha=0.3)
-            plt.savefig(f'{save_path}{station}_{mode[0]}.png')
+            plt.savefig(f'{save_path}_{station}_{mode[0]}.png', dpi=1000)
 
 def make_parking_plot(config, array:pd.DataFrame):
     """
